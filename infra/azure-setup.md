@@ -336,3 +336,6 @@ Login server: srchanacr01.azurecr.io
     "verticalPodAutoscaler": null
   }
 }
+
+Attached ACR srchanacr01 to AKS srchan-aks
+

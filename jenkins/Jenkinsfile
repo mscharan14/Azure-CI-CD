@@ -1,0 +1,58 @@
+pipeline {
+  agent any
+
+  environment {
+    ACR_LOGIN = "REPLACE_WITH_ACR_LOGIN"   // e.g. myacr.azurecr.io
+    IMAGE = "${ACR_LOGIN}/flask-todo"
+    GIT_CREDENTIALS_ID = 'git-creds'
+    AZURE_SP_JSON_CRED = 'azure-sp-json'  // file credential in Jenkins
+  }
+
+  stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'python3 -m venv venv || true'
+        sh '. venv/bin/activate && pip install -r requirements.txt'
+        sh '. venv/bin/activate && pytest -q'
+      }
+    }
+
+    stage('Build Docker') {
+      steps {
+        sh "docker build -t ${IMAGE}:${GIT_COMMIT} -f docker/Dockerfile ."
+      }
+    }
+
+    stage('Push to ACR') {
+      steps {
+        withCredentials([file(credentialsId: env.AZURE_SP_JSON_CRED, variable: 'AZ_SP_JSON')]) {
+          sh '''
+            SP_JSON=$(cat "${AZ_SP_JSON}")
+            CLIENT_ID=$(python -c "import json,sys;print(json.load(open('${AZ_SP_JSON}'))['clientId'])")
+            CLIENT_SECRET=$(python -c "import json,sys;print(json.load(open('${AZ_SP_JSON}'))['clientSecret'])")
+            echo $CLIENT_SECRET | docker login ${ACR_LOGIN} -u $CLIENT_ID --password-stdin
+            docker push ${ACR_LOGIN}/flask-todo:${GIT_COMMIT}
+          '''
+        }
+      }
+    }
+
+    stage('Update Helm values and push') {
+      steps {
+        sh "python - <<'PY'\nimport yaml\np='helm/todo-chart/values.yaml'\nd=open(p).read()\no=yaml.safe_load(d)\no['image']['tag']=''+ '${GIT_COMMIT}'\nopen(p,'w').write(yaml.dump(o))\nPY"
+        sh 'git config user.email "jenkins@example.com"'
+        sh 'git config user.name "jenkins-ci"'
+        sh 'git add helm/todo-chart/values.yaml || true'
+        sh 'git commit -m "ci: bump image tag to ${GIT_COMMIT}" || true'
+        withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+          sh 'git push https://${GIT_USER}:${GIT_PASS}@github.com/<your-username>/<your-repo>.git HEAD:main'
+        }
+      }
+    }
+  }
+  post { failure { echo "Pipeline failed" } }
+}

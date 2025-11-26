@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo-chart.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "todo-chart.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "todo-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "todo-chart.name" . }}
+    spec:
+      containers:
+        - name: {{ include "todo-chart.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              path: /api/todos
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/todos
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5

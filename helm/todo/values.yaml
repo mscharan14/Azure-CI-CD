@@ -1,0 +1,11 @@
+replicaCount: 2
+image:
+  repository: "REPLACE_WITH_ACR_LOGIN/flask-todo"
+  pullPolicy: IfNotPresent
+  tag: "latest"
+service:
+  type: ClusterIP
+  port: 80
+ingress:
+  enabled: false
+resources: {}

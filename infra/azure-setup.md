@@ -24,3 +24,8 @@ $AKS_NAME = "${PREFIX}-aks"
   "tags": null,
   "type": "Microsoft.Resources/resourceGroups"
 }
+
+---
+# ACR created
+Login server: 
+

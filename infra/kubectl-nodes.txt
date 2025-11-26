@@ -1,0 +1,2 @@
+﻿NAME                                STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+aks-nodepool1-81686193-vmss000000   Ready    <none>   6m47s   v1.32.9   10.224.0.4    <none>        Ubuntu 22.04.5 LTS   5.15.0-1098-azure   containerd://1.7.28-1

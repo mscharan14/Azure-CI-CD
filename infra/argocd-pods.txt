@@ -1,8 +1,0 @@
-﻿NAME                                               READY   STATUS    RESTARTS   AGE   IP             NODE                                NOMINATED NODE   READINESS GATES
-argocd-application-controller-0                    0/1     Running   0          6s    10.244.0.29    aks-nodepool1-81686193-vmss000000   <none>           <none>
-argocd-applicationset-controller-fc5545556-f8sr2   1/1     Running   0          16s   10.244.0.55    aks-nodepool1-81686193-vmss000000   <none>           <none>
-argocd-dex-server-f59c65cff-vt6vs                  1/1     Running   0          14s   10.244.0.38    aks-nodepool1-81686193-vmss000000   <none>           <none>
-argocd-notifications-controller-59f6949d7-jxgnz    1/1     Running   0          13s   10.244.0.156   aks-nodepool1-81686193-vmss000000   <none>           <none>
-argocd-redis-75c946f559-45j8z                      1/1     Running   0          13s   10.244.0.213   aks-nodepool1-81686193-vmss000000   <none>           <none>
-argocd-repo-server-6959c47c44-9dhm8                0/1     Running   0          10s   10.244.0.186   aks-nodepool1-81686193-vmss000000   <none>           <none>
-argocd-server-65544f4864-smqcs                     0/1     Running   0          8s    10.244.0.163   aks-nodepool1-81686193-vmss000000   <none>           <none>

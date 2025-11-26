@@ -1,7 +1,20 @@
+# Python
+venv/
 __pycache__/
 *.pyc
-*.sqlite
-.env
+
+# IDE
 .vscode/
-venv/
+.idea/
+
+# OS files
 .DS_Store
+
+# Logs
+*.log
+
+# Azure secrets (NEVER commit)
+*.json
+!rg-create.json
+!acr-create.json
+!aks-create.json

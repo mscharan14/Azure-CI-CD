@@ -1,0 +1,11 @@
+﻿{
+  "id": "/subscriptions/a3c751c7-e5ae-4625-8f30-2398d722fd10/resourceGroups/srchan-rg",
+  "location": "eastus",
+  "managedBy": null,
+  "name": "srchan-rg",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}

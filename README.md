@@ -34,6 +34,19 @@ The pipeline:
 
 ![Preview](./Architecture.png)
 
+
+## Prerequisites
+
+- Azure CLI installed and configured (`az login`)
+- kubectl installed
+- Helm installed
+- Docker installed (optional, but useful for local testing)
+- Git installed
+- GitHub account with a Personal Access Token (PAT)
+- Azure subscription with free-tier limits available
+- Basic understanding of YAML, Git, and Kubernetes (helpful but not required)
+
+
 ## Setup Steps
 
 1. **Create Azure Resource Group**

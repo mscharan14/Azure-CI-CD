@@ -3,59 +3,42 @@ pipeline {
 
   environment {
     PREFIX = "srchan"
-    ACR_NAME = "${env.PREFIX}acr01"   // update if you used different name
-    ACR_LOGIN = ""                    // will be retrieved in the pipeline
-    GIT_COMMIT = ""                   // will be set at runtime
+    ACR_NAME = "${env.PREFIX}acr01"   // update to your ACR if different
   }
 
   stages {
     stage('Prepare') {
       steps {
         script {
-          // set commit short sha
           env.GIT_COMMIT = sh(script: "git rev-parse --short HEAD", returnStdout:true).trim()
         }
         echo "Commit: ${env.GIT_COMMIT}"
       }
     }
 
-    stage('Test') {
-      agent {
-        docker { image 'python:3.11-slim' }
-      }
+    stage('Build & Test (in ACR)') {
       steps {
-        sh 'python -m venv venv'
-        sh '. venv/bin/activate && pip install -r requirements.txt || true'
-        // run tests; don't fail pipeline if no tests
-        sh '. venv/bin/activate && pytest -q || true'
-      }
-    }
-
-    stage('Build (ACR cloud build)') {
-      agent {
-        docker { image 'mcr.microsoft.com/azure-cli' } // azure cli image
-      }
-      steps {
-        withCredentials([file(credentialsId: 'azure-sp-json', variable: 'AZURE_AUTH_LOCATION')]) {
-          // login to azure using SDK auth file
-          sh 'az login --service-principal --sdk-auth @$AZURE_AUTH_LOCATION >/dev/null'
-          sh "az acr build --registry ${env.ACR_NAME} --image flask-todo:${env.GIT_COMMIT} --file docker/Dockerfile ."
+        withCredentials([file(credentialsId: 'azure-sp-json', variable: 'AZURE_AUTH')]) {
+          // Login using service principal json
+          sh 'az login --service-principal --sdk-auth @$AZURE_AUTH >/dev/null'
+          // Build image on ACR. Dockerfile must run tests and fail build if tests fail.
+          sh "az acr build --registry ${ACR_NAME} --image flask-todo:${GIT_COMMIT} --file docker/Dockerfile ."
         }
       }
     }
 
     stage('Update Helm values & push') {
-      agent {
-        docker { image 'alpine/git' }
-      }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'git-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+        withCredentials([usernamePassword(credentialsId: 'git-creds', usernameVariable: 'GIT_USER', passwordVariable:'GIT_TOKEN')]) {
           sh '''
+            set -e
             git config user.email "jenkins@example.com"
             git config user.name "jenkins-ci"
-            git clone https://$GIT_USER:$GIT_TOKEN@github.com/mscharan14/Azure-CI-CD.git repo || true
+            # clone to a temp dir so Jenkins workspace stays clean
+            rm -rf repo || true
+            git clone https://$GIT_USER:$GIT_TOKEN@github.com/mscharan14/Azure-CI-CD.git repo
             cd repo
-            # update values.yaml (simple replace)
+            # update the chart values
             sed -i "s/tag: .*/tag: \\"${GIT_COMMIT}\\"/" helm/todo-chart/values.yaml || true
             git add helm/todo-chart/values.yaml
             git commit -m "ci: bump image tag to ${GIT_COMMIT}" || true
@@ -67,14 +50,9 @@ pipeline {
   }
 
   post {
-    always {
-      echo "Pipeline finished"
-    }
-    success {
-      echo "Pipeline succeeded"
-    }
-    failure {
-      echo "Pipeline failed"
-    }
+    always { echo "Pipeline finished" }
+    success { echo "Pipeline succeeded" }
+    failure { echo "Pipeline failed" }
   }
 }
+

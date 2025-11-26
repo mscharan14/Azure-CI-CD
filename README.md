@@ -39,13 +39,11 @@ The pipeline:
 1. **Create Azure Resource Group**
     ```
     az group create -n <RG_NAME> -l <LOCATION>
-    
     ```
 
 2. **Create Azure Container Registry (ACR)**
     ```
     az acr create -g <RG_NAME> -n <ACR_NAME> --sku Basic --admin-enabled false
-    
     ```
 
 3. **Create AKS Cluster**
@@ -57,13 +55,11 @@ The pipeline:
     --node-vm-size Standard_DS2_v2
     --enable-managed-identity
     --generate-ssh-keys
-    
     ```
 
 4. **Connect kubectl to AKS**
     ```
     az aks get-credentials -g <RG_NAME> -n <AKS_NAME>
-    
     ```
 
 5. **Install Jenkins using Helm**
@@ -118,7 +114,6 @@ Install ArgoCD:
   
   kubectl apply -n argocd -f \
   https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-  
   ```
 Get ArgoCD Initial Password:
 
@@ -133,7 +128,6 @@ Expose ArgoCD UI (NodePort for free tier):
 Access ArgoCD: 
 ```
 http://<NODE-IP>:<NODEPORT>
-
 ```
 Configure ArgoCD App:
 ArgoCD watches the Helm chart folder: /helm/todo-app
